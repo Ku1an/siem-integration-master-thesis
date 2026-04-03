@@ -1,0 +1,7 @@
+services:
+  zap-tool:
+    build: .
+    environment:
+      - PYTHONUNBUFFERED=1  # This forces immediate printing
+    volumes:
+      - ./logs:/zap/src/logs

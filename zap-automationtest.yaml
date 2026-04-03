@@ -1,0 +1,57 @@
+env:
+  contexts:
+    - name: "DVWA-form"
+      urls:
+      - "http://192.168.50.77"
+      includePaths:
+      - "http://192.168.50.77.*"
+      excludePaths:
+      - "http://192.168.50.77/logout.php"
+      - "http://192.168.50.77/login.php"
+      - "http://192.168.50.77/setup.php"
+      - "http://192.168.50.77/security.php"
+      - "http://192.168.50.77/vulnerabilities/csrf.*"
+      authentication:
+        method: "form"
+        parameters:
+          loginRequestBody: "username={%username%}&password=password&Login=Login&user_token=f4c2be9fba02186111829f053797c917"
+          loginPageUrl: "http://192.168.50.77/login.php"
+          loginRequestUrl: "http://192.168.50.77/login.php"
+      sessionManagement:
+        method: "headers"
+        parameters:
+          Cookie: "PHPSESSID={%cookie:PHPSESSID%}; security=low"
+      technology:
+        exclude: []
+        include: []
+      users:
+      - name: "zap-user"
+        credentials:
+          password: "password"
+          username: "admin"
+jobs:
+  - type: spider
+    parameters:
+      context: "DVWA-form"
+      user: "zap-user"
+    tests:
+    - onFail: "ERROR"
+      statistic: "automation.spider.urls.added"
+      site: ""
+      operator: ">="
+      value: 100
+      name: "At least 100 URLs found"
+      type: "stats"
+
+  - type: activeScan
+    parameters:
+      context: "DVWA-form"
+      user: "zap-user"
+      maxScanDurationInMins: 0
+      maxRuleDurationInMins: 2
+
+  - type: report
+    parameters:
+      template: "traditional-json-plus"
+      reportDir: "/zap/src/logs"
+      reportFile: "report.json"
