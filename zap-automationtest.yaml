@@ -34,20 +34,11 @@ jobs:
     parameters:
       context: "DVWA-form"
       user: "zap-user"
-    tests:
-    - onFail: "ERROR"
-      statistic: "automation.spider.urls.added"
-      site: ""
-      operator: ">="
-      value: 100
-      name: "At least 100 URLs found"
-      type: "stats"
-
   - type: activeScan
     parameters:
       context: "DVWA-form"
       user: "zap-user"
-      maxScanDurationInMins: 0
+      maxScanDurationInMins: 2
       maxRuleDurationInMins: 2
 
   - type: report

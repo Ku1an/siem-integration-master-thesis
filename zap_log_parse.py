@@ -4,18 +4,21 @@ import os
 
 
 class ZapLogEventWazuh:
-    def __init__(self, timestamp, ip, port, alert, alert_desc, risk, confidence, url, request_header, solution, solution_reference):
+    def __init__(self, timestamp, ip, port, alert, alert_desc, risk, confidence, url, request_header, request_body, response_header, response_body, solution, solution_reference):
         self.event = {
             "source": "zap-event",
             "timestamp": timestamp,
             "ip": ip,
-            "port": port,
+            "app_port": port,
             "alert": alert,
             "alert_desc": alert_desc,
             "risk": risk,
             "confidence": confidence,
             "url": url,
             "request_header": request_header,
+            "request_body": request_body,
+            "response_header": response_header,
+            "response_body": response_body,
             "solution": solution,
             "solution_reference": solution_reference
         }
@@ -75,8 +78,8 @@ def parse_zap_report():
                 alert_list = site.get("alerts")
                 for alert in alert_list:
                     alert_name = alert.get("alert")
-                    risk = alert.get("riskcode")
-                    confidence = alert.get("confidence")
+                    risk = int(alert.get("riskcode"))
+                    confidence = int(alert.get("confidence"))
                     desc = alert.get("desc").replace("<p>","").replace("</p>","")
                     solution = alert.get("solution").replace("<p>","").replace("</p>","")
                     solution_ref = alert.get("reference")
@@ -85,6 +88,10 @@ def parse_zap_report():
                         #Here we create one object for each vulnerable endpoint
                         url = instance.get("uri")
                         request_header = instance.get("request-header")
+                        request_body = instance.get("request-body")
+                        response_header = instance.get("response-header")
+                        response_body = instance.get("response-body")
+                        
 
                         # Create the ZapEventWazuh object
                         event = ZapLogEventWazuh(
@@ -97,6 +104,9 @@ def parse_zap_report():
                             confidence,
                             url,
                             request_header,
+                            request_body,
+                            response_header,
+                            response_body,
                             solution,
                             solution_ref
                         ).event
