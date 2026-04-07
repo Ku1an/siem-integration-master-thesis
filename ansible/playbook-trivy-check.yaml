@@ -1,0 +1,17 @@
+- name: Check Trivy installation
+  hosts: wazuhagents
+  become: yes
+
+  tasks:
+    - name: Gather installed package info
+      package_facts:
+        manager: apt
+
+    - name: Report Trivy version if installed
+      debug:
+        msg: >-
+          {% if 'trivy' in ansible_facts.packages %}
+            Trivy is installed, version {{ ansible_facts.packages['trivy'][0].version }}
+          {% else %}
+            Trivy is NOT installed
+          {% endif %}
