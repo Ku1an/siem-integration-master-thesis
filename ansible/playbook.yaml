@@ -4,31 +4,41 @@
 
   tasks:
 
-    - name: Ensure required packages are installed
-      apt:
-        name: 
-          - wget
-          - gnupg
-        state: present
-        update_cache: yes
+    - name: Gather package facts
+      ansible.builtin.package_facts:
+        manager: apt
 
-    - name: Add Trivy GPG key
-      ansible.builtin.apt_key:
-        url: https://aquasecurity.github.io/trivy-repo/deb/public.key
-        state: present
-        keyring: /usr/share/keyrings/trivy.gpg
+    - name: "If wazuh agent exists, proceed to install trivy"
+      block:
+        - name: Ensure required packages are installed
+          apt:
+            name: 
+              - wget
+              - gnupg
+            state: present
+            update_cache: yes
 
-    - name: Add Trivy APT repository
-      ansible.builtin.apt_repository:
-        repo: "deb [signed-by=/usr/share/keyrings/trivy.gpg] https://aquasecurity.github.io/trivy-repo/deb generic main"
-        filename: trivy
-        state: present
+        - name: Add Trivy GPG key
+          ansible.builtin.apt_key:
+            url: https://aquasecurity.github.io/trivy-repo/deb/public.key
+            state: present
+            keyring: /usr/share/keyrings/trivy.gpg
 
-    - name: Update apt cache
-      apt:
-        update_cache: yes
+        - name: Add Trivy APT repository
+          ansible.builtin.apt_repository:
+            repo: "deb [signed-by=/usr/share/keyrings/trivy.gpg] https://aquasecurity.github.io/trivy-repo/deb generic main"
+            filename: trivy
+            state: present
 
-    - name: Install Trivy
-      apt:
-        name: trivy
-        state: present
+        - name: Update apt cache
+          apt:
+            update_cache: yes
+
+        - name: Install Trivy
+          apt:
+            name: trivy
+            state: present
+        
+        #Here, we creates every single config needed to setup Trivy test on the agents
+
+      when: "'wazuh-agent' in ansible_facts.packages"
